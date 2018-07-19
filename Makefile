@@ -2,7 +2,7 @@ CXX=c++
 BIN=example
 CFLAGS=-Isrc
 
-MODULES =\
+MODULES= \
   src/mongoosemm/*.cpp \
   src/example/*.cpp
 
