@@ -59,8 +59,8 @@ class ConnectionHandler
 
   std::shared_ptr<ConnectionHandler> self;
 
-  virtual void onWebsocketHandshakeDone(Connection &conn);
-  virtual void onWebsocketFrame(Connection &conn, WebsocketFrame& frame);
+  virtual void onWebsocketHandshakeDone(Connection& conn);
+  virtual void onWebsocketFrame(Connection& conn, WebsocketFrame& frame);
   virtual void onHttpRequest(Connection& conn, HttpMessage& message);
   virtual void onClose(Connection& conn);
 

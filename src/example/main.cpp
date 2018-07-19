@@ -4,12 +4,12 @@
 
 class ExampleHandler : public mongoosemm::ConnectionHandler
 {
-  void onWebsocketHandshakeDone(mongoosemm::Connection &conn)
+  void onWebsocketHandshakeDone(mongoosemm::Connection& conn)
   {
     std::cout << "Handshake Done" << std::endl;
   }
 
-  void onWebsocketFrame(mongoosemm::Connection &conn, mongoosemm::WebsocketFrame& frame)
+  void onWebsocketFrame(mongoosemm::Connection& conn, mongoosemm::WebsocketFrame& frame)
   {
     std::cout << "Websocket Frame" << std::endl;
   }

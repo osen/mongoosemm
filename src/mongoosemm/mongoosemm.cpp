@@ -5,8 +5,8 @@
 namespace mongoosemm
 {
 
-void ConnectionHandler::onWebsocketHandshakeDone(Connection &conn) { }
-void ConnectionHandler::onWebsocketFrame(Connection &conn, WebsocketFrame& frame) { }
+void ConnectionHandler::onWebsocketHandshakeDone(Connection& conn) { }
+void ConnectionHandler::onWebsocketFrame(Connection& conn, WebsocketFrame& frame) { }
 void ConnectionHandler::onHttpRequest(Connection& conn, HttpMessage& message) { }
 void ConnectionHandler::onClose(Connection& conn) { }
 ConnectionHandler::~ConnectionHandler() { }
