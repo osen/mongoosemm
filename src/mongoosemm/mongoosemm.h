@@ -14,6 +14,7 @@ struct ConnectionImpl;
 struct ManagerImpl;
 class ConnectionHandler;
 class Manager;
+struct Connection;
 
 struct ServeHttpOpts
 {
@@ -23,8 +24,13 @@ struct ServeHttpOpts
 
 class HttpMessage
 {
+  friend class ManagerImpl;
+
   std::shared_ptr<HttpMessageImpl> sImpl;
   std::weak_ptr<HttpMessageImpl> wImpl;
+
+public:
+  void serveHttp(Connection& conn);
 };
 
 class WebsocketFrame

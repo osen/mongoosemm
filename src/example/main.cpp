@@ -17,6 +17,7 @@ class ExampleHandler : public mongoosemm::ConnectionHandler
   void onHttpRequest(mongoosemm::Connection& conn, mongoosemm::HttpMessage& message)
   {
     std::cout << "Http Request" << std::endl;
+    message.serveHttp(conn);
   }
 
   void onClose(mongoosemm::Connection& conn)

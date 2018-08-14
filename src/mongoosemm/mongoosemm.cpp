@@ -15,6 +15,11 @@ ConnectionHandler::~ConnectionHandler() { }
 
 void dummyDeleter(ConnectionHandler *ptr) { }
 
+struct HttpMessageImpl
+{
+  http_message *message;
+};
+
 ConnectionHandler::ConnectionHandler()
 {
   self.reset(this, dummyDeleter);
@@ -63,14 +68,17 @@ struct ManagerImpl
   static void ev_handler(mg_connection *nc, int ev, void *ev_data)
   {
     Connection *c = (Connection *)nc->user_data;
+    Connection *cc = c;
 
-    if(!c)
+    if(!c || c->wImpl.lock()->nc != nc)
     {
       c = new Connection();
       c->sImpl = std::make_shared<ConnectionImpl>();
       c->wImpl = c->sImpl;
       c->sImpl->nc = nc;
+      c->sImpl->handler = cc->wImpl.lock()->handler;
       nc->user_data = c;
+      printf("Making\n");
     }
 
     Connection con = *c;
@@ -84,7 +92,12 @@ struct ManagerImpl
     if(ev == MG_EV_HTTP_REQUEST)
     {
       HttpMessage httpMessage;
-      c->wImpl.lock()->handler.lock()->onHttpRequest(con, httpMessage);
+      httpMessage.sImpl = std::make_shared<HttpMessageImpl>();
+      httpMessage.wImpl = httpMessage.sImpl;
+      httpMessage.sImpl->message = (http_message *)ev_data;
+      HttpMessage m = httpMessage;
+      m.sImpl.reset();
+      c->wImpl.lock()->handler.lock()->onHttpRequest(con, m);
     }
     else
     {
@@ -125,6 +138,14 @@ Connection Manager::bind(int port, ConnectionHandler& handler)
 void Manager::poll(int milliseconds)
 {
   mg_mgr_poll(&impl->mgr, milliseconds);
+}
+
+void HttpMessage::serveHttp(Connection& conn)
+{
+  mg_serve_http_opts opts = {0};
+  opts.document_root = ".";
+  opts.enable_directory_listing = "yes";
+  mg_serve_http(conn.wImpl.lock()->nc, wImpl.lock()->message, opts);
 }
 
 }
