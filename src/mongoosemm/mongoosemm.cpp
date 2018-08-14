@@ -38,8 +38,7 @@ struct ConnectionImpl
 
   ~ConnectionImpl()
   {
-    Connection *c = (Connection *)nc->user_data;
-    if(c) delete c;
+    nc->user_data = NULL;
   }
 };
 
@@ -80,16 +79,15 @@ struct ManagerImpl
       c->sImpl->handler = cc->wImpl.lock()->handler;
       c->sImpl->mgr = cc->wImpl.lock()->mgr;
       nc->user_data = c;
-      printf("Making\n");
     }
-
-    Connection con = *c;
-    con.sImpl.reset();
 
     if(c->wImpl.lock()->handler.expired())
     {
       return;
     }
+
+    Connection con = *c;
+    con.sImpl.reset();
 
     if(ev == MG_EV_HTTP_REQUEST)
     {
@@ -103,7 +101,6 @@ struct ManagerImpl
     }
     else if(ev == MG_EV_CLOSE)
     {
-      c->wImpl.lock()->nc->user_data = NULL;
       delete c;
     }
     else
