@@ -35,7 +35,7 @@ int main()
 
   nc.setProtocolHttpWebsocket();
 
-  for(int i = 0; i < 3; i++)
+  for(int i = 0; i < 30; i++)
   {
     mgr.poll(1000);
   }

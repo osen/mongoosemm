@@ -37,14 +37,13 @@ public:
   std::string getText();
 };
 
-class Connection
+struct Connection
 {
   friend class mongoosemm::Manager;
 
   std::shared_ptr<ConnectionImpl> sImpl;
   std::weak_ptr<ConnectionImpl> wImpl;
 
-public:
   void setProtocolHttpWebsocket();
   void serveHttp(HttpMessage& message, ServeHttpOpts& opts);
   void sendWebsocketFrame(std::vector<unsigned char>& data);
@@ -53,9 +52,8 @@ public:
 
 class ConnectionHandler
 {
+  friend class mongoosemm::ManagerImpl;
   friend class mongoosemm::Manager;
-
-  static void dummyDeleter(ConnectionHandler *ptr);
 
   std::shared_ptr<ConnectionHandler> self;
 
