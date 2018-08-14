@@ -27,6 +27,7 @@ ConnectionHandler::ConnectionHandler()
 
 struct ConnectionImpl
 {
+  Manager mgr;
   std::weak_ptr<ConnectionHandler> handler;
   mg_connection *nc;
 
@@ -77,6 +78,7 @@ struct ManagerImpl
       c->wImpl = c->sImpl;
       c->sImpl->nc = nc;
       c->sImpl->handler = cc->wImpl.lock()->handler;
+      c->sImpl->mgr = cc->wImpl.lock()->mgr;
       nc->user_data = c;
       printf("Making\n");
     }
@@ -99,6 +101,11 @@ struct ManagerImpl
       m.sImpl.reset();
       c->wImpl.lock()->handler.lock()->onHttpRequest(con, m);
     }
+    else if(ev == MG_EV_CLOSE)
+    {
+      c->wImpl.lock()->nc->user_data = NULL;
+      delete c;
+    }
     else
     {
       printf("Unhandled event %i\n", ev);
@@ -108,9 +115,10 @@ struct ManagerImpl
 
 void Manager::init()
 {
-  impl = std::make_shared<ManagerImpl>();
-  mg_mgr_init(&impl->mgr, NULL);
-  impl->mgr.user_data = new Manager(*this);
+  sImpl = std::make_shared<ManagerImpl>();
+  mg_mgr_init(&sImpl->mgr, NULL);
+  sImpl->mgr.user_data = new Manager(*this);
+  wImpl = sImpl;
 }
 
 Connection Manager::bind(int port, ConnectionHandler& handler)
@@ -121,12 +129,14 @@ Connection Manager::bind(int port, ConnectionHandler& handler)
   rtn.wImpl = rtn.sImpl;
 
   rtn.sImpl->handler = handler.self;
+  rtn.sImpl->mgr = *this;
+  rtn.sImpl->mgr.sImpl.reset();
 
   std::stringstream ss;
   ss << port;
-  rtn.sImpl->nc = mg_bind(&impl->mgr, ss.str().c_str(), ManagerImpl::ev_handler);
+  rtn.sImpl->nc = mg_bind(&wImpl.lock()->mgr, ss.str().c_str(), ManagerImpl::ev_handler);
 
-  impl->connections.push_back(rtn);
+  wImpl.lock()->connections.push_back(rtn);
 
   rtn.sImpl.reset();
 
@@ -137,7 +147,7 @@ Connection Manager::bind(int port, ConnectionHandler& handler)
 
 void Manager::poll(int milliseconds)
 {
-  mg_mgr_poll(&impl->mgr, milliseconds);
+  mg_mgr_poll(&wImpl.lock()->mgr, milliseconds);
 }
 
 void HttpMessage::serveHttp(Connection& conn)

@@ -76,7 +76,8 @@ public:
 
 class Manager
 {
-  std::shared_ptr<ManagerImpl> impl;
+  std::shared_ptr<ManagerImpl> sImpl;
+  std::weak_ptr<ManagerImpl> wImpl;
 
 public:
   void init();
